@@ -45,7 +45,7 @@ size_t ULListStr::size() const
       newTail->prev = tail_;
       tail_ = newTail;
       size_++;
-    } else {
+    } else if (tail_->last < ARRSIZE){
       tail_->val[tail_->last] = val;
       tail_->last++;
       size_++;
@@ -57,18 +57,22 @@ size_t ULListStr::size() const
    *   - MUST RUN in O(1)
    */
   void ULListStr::pop_back(){
-    if (size_ == 0){
+    if (head_ == NULL){
       return;
-    } else if (tail_->last == 1){
+    } else if (tail_->last - tail_->first == 1){
       Item* oldTail = tail_;
       tail_ = oldTail->prev;
+      if (tail_!= NULL){
+        tail_->next = NULL;
+      } else {
+        head_ = NULL;
+      }
       delete oldTail;
-      size_--;
     } else {
       tail_->last--;
-      size_--;
     }
-    }
+    size_--;  
+  }
 
   /**
    * Adds a new value to the front of the list.
@@ -94,7 +98,7 @@ size_t ULListStr::size() const
       newHead->next = head_;
       head_ = newHead;
       size_++;
-    } else {
+    } else if (head_->first > 0){
       head_->first--;
       head_->val[head_->first] = val;
       size_++;
@@ -108,15 +112,22 @@ size_t ULListStr::size() const
   void ULListStr::pop_front(){
     if (size_ == 0){
       return;
-    } else if (head_->first == head_->last-1){
+    } 
+    
+    if (head_->last - head_->first == 1){
       Item* oldHead = head_;
-      head_ = oldHead->next;
+      head_ = head_->next;
+      if (head_!= NULL){
+        head_->prev = NULL;
+      } else {
+        tail_ = NULL;
+      }
       delete oldHead;
-      size_--;
     } else {
       head_->first++;
-      size_--;
     }
+
+    size_--;
   }
 
   /** 
@@ -125,15 +136,19 @@ size_t ULListStr::size() const
    *   - MUST RUN in O(n) 
    */
   std::string* ULListStr::getValAtLoc(size_t loc) const{
-    if (loc >= size_ || size_ == 0 || loc < 0){
+    if (loc >= size_ || empty()){
       return NULL;
     }
     Item* current = head_;
-    while (loc >= ARRSIZE){
-      loc -= ARRSIZE;
+    while (current != NULL){
+      int currentSize = current->last - current->first;
+      if (loc < currentSize){
+        return &(current->val[current->first + loc]);
+      }
+      loc -= currentSize;
       current = current->next;
     }
-    return &(current->val[current->first + loc]);
+    return NULL;
   }
   
   
